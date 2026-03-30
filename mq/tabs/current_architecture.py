@@ -6,9 +6,10 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from ..charts import create_heatmap, create_network_graph
+from ..charts import create_heatmap
 from ..data import extract_flows, neighborhood_col
 from ..graph import build_app_graph, build_qm_graph
+from ..network_viz import st_pyvis
 
 
 def render(df: pd.DataFrame) -> None:
@@ -47,20 +48,17 @@ def render(df: pd.DataFrame) -> None:
 
     if view_mode == "QM-Level Network":
         G_qm = build_qm_graph(df)
-        st.plotly_chart(
-            create_network_graph(G_qm, "Current QM Topology – Shared Queue Managers"),
-            use_container_width=True,
-        )
+        st_pyvis(G_qm, height=620)
 
     elif view_mode == "App-Level Network":
         G_app = build_app_graph(df)
-        if len(G_app.nodes) > 50:
-            st.info("Large graph – showing adjacency matrix for clarity.")
+        if len(G_app.nodes) > 80:
+            st.info("Large graph – showing adjacency matrix. Toggle to a smaller filter for the interactive view.")
             fig = create_heatmap(df, "app_id", "remote_q_mgr_name",
                                  "App to QM Channel Density")
+            st.plotly_chart(fig, use_container_width=True)
         else:
-            fig = create_network_graph(G_app, "Current App-Level Message Flow")
-        st.plotly_chart(fig, use_container_width=True)
+            st_pyvis(G_app, height=620)
 
     else:
         st.plotly_chart(

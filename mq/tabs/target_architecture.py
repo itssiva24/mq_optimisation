@@ -6,8 +6,8 @@ import pandas as pd
 import streamlit as st
 
 from ..architecture import generate_target_architecture
-from ..charts import create_network_graph
 from ..graph import build_app_graph, build_qm_graph
+from ..network_viz import st_pyvis
 
 
 def render(df: pd.DataFrame, shared_qm_count: int) -> None:
@@ -52,17 +52,11 @@ def render(df: pd.DataFrame, shared_qm_count: int) -> None:
 
     if view_t == "QM-Level Network":
         G_tqm = build_qm_graph(target_df)
-        st.plotly_chart(
-            create_network_graph(G_tqm, "Target QM Topology – 1 QM per App"),
-            use_container_width=True,
-        )
+        st_pyvis(G_tqm, height=620, physics=False)   # target is clean – static layout looks better
 
     elif view_t == "App-Level Network":
         G_tapp = build_app_graph(target_df)
-        st.plotly_chart(
-            create_network_graph(G_tapp, "Target App-Level Message Flow"),
-            use_container_width=True,
-        )
+        st_pyvis(G_tapp, height=620, physics=False)
 
     else:
         channels = {
